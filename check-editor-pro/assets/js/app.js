@@ -34,6 +34,8 @@ class CheckEditorProWordPress {
         this.setupExportTools();
         this.setupCloudStorage();
         this.setupHelpModal();
+        this.setupCanvasSizeControls();
+        this.setupRulerAndGrid();
         
         // Load default template
         this.loadTemplate(this.currentTemplate);
@@ -643,6 +645,304 @@ class CheckEditorProWordPress {
                 }
             }, 300);
         }, 3000);
+    }
+
+    setupCanvasSizeControls() {
+        const sizePreset = this.$('#cepCanvasSizePreset');
+        const widthInput = this.$('#cepCanvasWidth');
+        const heightInput = this.$('#cepCanvasHeight');
+        const unitSelect = this.$('#cepCanvasUnit');
+        const applyBtn = this.$('#cepApplySizeBtn');
+
+        // Canvas size presets
+        const presets = {
+            'hk_check': { width: 215, height: 85, unit: 'mm' },
+            'us_check': { width: 203, height: 89, unit: 'mm' },
+            'cn_check': { width: 190, height: 80, unit: 'mm' },
+            'a4_landscape': { width: 297, height: 210, unit: 'mm' },
+            'a5_landscape': { width: 210, height: 148, unit: 'mm' }
+        };
+
+        if (sizePreset) {
+            sizePreset.addEventListener('change', (e) => {
+                const preset = presets[e.target.value];
+                if (preset) {
+                    widthInput.value = preset.width;
+                    heightInput.value = preset.height;
+                    unitSelect.value = preset.unit;
+                }
+            });
+        }
+
+        if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+                this.applyCanvasSize();
+            });
+        }
+
+        // Auto-apply on Enter key
+        [widthInput, heightInput].forEach(input => {
+            if (input) {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.applyCanvasSize();
+                    }
+                });
+            }
+        });
+    }
+
+    applyCanvasSize() {
+        const widthInput = this.$('#cepCanvasWidth');
+        const heightInput = this.$('#cepCanvasHeight');
+        const unitSelect = this.$('#cepCanvasUnit');
+
+        const width = parseFloat(widthInput.value);
+        const height = parseFloat(heightInput.value);
+        const unit = unitSelect.value;
+
+        if (!width || !height || width <= 0 || height <= 0) {
+            this.showMessage('請輸入有效的寬度和高度', 'error');
+            return;
+        }
+
+        // Convert to pixels (96 DPI)
+        const pixelWidth = this.convertToPixels(width, unit);
+        const pixelHeight = this.convertToPixels(height, unit);
+
+        // Update canvas size
+        this.editor.setCanvasSize(pixelWidth, pixelHeight);
+        this.updateCanvasInfo(width, height, unit);
+        this.updateRulers();
+        this.updateGrid();
+        
+        this.showMessage(`畫布尺寸已設定為 ${width} × ${height} ${unit}`, 'success');
+    }
+
+    convertToPixels(value, unit) {
+        const dpi = 96; // Standard web DPI
+        switch (unit) {
+            case 'mm':
+                return value * dpi / 25.4;
+            case 'cm':
+                return value * dpi / 2.54;
+            case 'in':
+                return value * dpi;
+            case 'px':
+            default:
+                return value;
+        }
+    }
+
+    convertFromPixels(pixels, unit) {
+        const dpi = 96;
+        switch (unit) {
+            case 'mm':
+                return pixels * 25.4 / dpi;
+            case 'cm':
+                return pixels * 2.54 / dpi;
+            case 'in':
+                return pixels / dpi;
+            case 'px':
+            default:
+                return pixels;
+        }
+    }
+
+    updateCanvasInfo(width, height, unit) {
+        const canvasSize = this.$('#cepCanvasSize');
+        if (canvasSize) {
+            canvasSize.textContent = `尺寸: ${width} × ${height} ${unit}`;
+        }
+    }
+
+    setupRulerAndGrid() {
+        const toggleRulerBtn = this.$('#cepToggleRulerBtn');
+        const toggleGridBtn = this.$('#cepToggleGridBtn');
+        const snapToGridBtn = this.$('#cepSnapToGridBtn');
+
+        this.rulerVisible = true;
+        this.gridVisible = false;
+        this.snapToGrid = false;
+
+        if (toggleRulerBtn) {
+            toggleRulerBtn.addEventListener('click', () => {
+                this.toggleRuler();
+            });
+        }
+
+        if (toggleGridBtn) {
+            toggleGridBtn.addEventListener('click', () => {
+                this.toggleGrid();
+            });
+        }
+
+        if (snapToGridBtn) {
+            snapToGridBtn.addEventListener('click', () => {
+                this.toggleSnapToGrid();
+            });
+        }
+
+        // Initialize rulers
+        this.updateRulers();
+        this.setupMouseTracking();
+    }
+
+    toggleRuler() {
+        this.rulerVisible = !this.rulerVisible;
+        const horizontalRuler = this.$('#cepHorizontalRuler');
+        const verticalRuler = this.$('#cepVerticalRuler');
+        const toggleBtn = this.$('#cepToggleRulerBtn');
+
+        if (horizontalRuler) horizontalRuler.style.display = this.rulerVisible ? 'block' : 'none';
+        if (verticalRuler) verticalRuler.style.display = this.rulerVisible ? 'block' : 'none';
+        if (toggleBtn) toggleBtn.classList.toggle('active', this.rulerVisible);
+    }
+
+    toggleGrid() {
+        this.gridVisible = !this.gridVisible;
+        const gridOverlay = this.$('#cepGridOverlay');
+        const toggleBtn = this.$('#cepToggleGridBtn');
+
+        if (gridOverlay) {
+            gridOverlay.classList.toggle('visible', this.gridVisible);
+        }
+        if (toggleBtn) toggleBtn.classList.toggle('active', this.gridVisible);
+        
+        this.updateGrid();
+    }
+
+    toggleSnapToGrid() {
+        this.snapToGrid = !this.snapToGrid;
+        const snapBtn = this.$('#cepSnapToGridBtn');
+        
+        if (snapBtn) snapBtn.classList.toggle('active', this.snapToGrid);
+        
+        // Enable/disable snap to grid in editor
+        if (this.editor && this.editor.canvas) {
+            this.editor.canvas.snapToGrid = this.snapToGrid;
+        }
+    }
+
+    updateRulers() {
+        if (!this.rulerVisible) return;
+
+        const horizontalRuler = this.$('#cepHorizontalRuler');
+        const verticalRuler = this.$('#cepVerticalRuler');
+        const unitSelect = this.$('#cepCanvasUnit');
+        const unit = unitSelect ? unitSelect.value : 'mm';
+
+        if (horizontalRuler && this.editor && this.editor.canvas) {
+            this.drawRuler(horizontalRuler, 'horizontal', unit);
+        }
+
+        if (verticalRuler && this.editor && this.editor.canvas) {
+            this.drawRuler(verticalRuler, 'vertical', unit);
+        }
+    }
+
+    drawRuler(rulerElement, orientation, unit) {
+        rulerElement.innerHTML = '';
+        
+        const canvasSize = orientation === 'horizontal' ? 
+            this.editor.canvas.width : this.editor.canvas.height;
+        
+        rulerElement.style.width = orientation === 'horizontal' ? canvasSize + 'px' : '20px';
+        rulerElement.style.height = orientation === 'vertical' ? canvasSize + 'px' : '20px';
+
+        const realSize = this.convertFromPixels(canvasSize, unit);
+        const step = this.getRulerStep(realSize, unit);
+        const pixelStep = this.convertToPixels(step, unit);
+
+        for (let i = 0; i <= realSize; i += step) {
+            const position = this.convertToPixels(i, unit);
+            if (position > canvasSize) break;
+
+            const isMajor = i % (step * 5) === 0;
+            const mark = document.createElement('div');
+            mark.className = `cep-ruler-mark ${isMajor ? 'major' : 'minor'}`;
+            
+            if (orientation === 'horizontal') {
+                mark.style.left = position + 'px';
+            } else {
+                mark.style.top = position + 'px';
+            }
+
+            rulerElement.appendChild(mark);
+
+            // Add labels for major marks
+            if (isMajor && i > 0) {
+                const label = document.createElement('div');
+                label.className = 'cep-ruler-label';
+                label.textContent = Math.round(i);
+                
+                if (orientation === 'horizontal') {
+                    label.style.left = position + 'px';
+                } else {
+                    label.style.top = position + 'px';
+                }
+                
+                rulerElement.appendChild(label);
+            }
+        }
+    }
+
+    getRulerStep(size, unit) {
+        // Determine appropriate step size based on total size
+        if (unit === 'mm') {
+            if (size <= 50) return 1;
+            if (size <= 200) return 5;
+            if (size <= 500) return 10;
+            return 20;
+        } else if (unit === 'cm') {
+            if (size <= 10) return 0.2;
+            if (size <= 50) return 1;
+            return 2;
+        } else if (unit === 'in') {
+            if (size <= 2) return 0.1;
+            if (size <= 12) return 0.25;
+            return 0.5;
+        } else { // px
+            if (size <= 200) return 10;
+            if (size <= 1000) return 50;
+            return 100;
+        }
+    }
+
+    updateGrid() {
+        const gridOverlay = this.$('#cepGridOverlay');
+        if (!gridOverlay || !this.gridVisible) return;
+
+        const unitSelect = this.$('#cepCanvasUnit');
+        const unit = unitSelect ? unitSelect.value : 'mm';
+        const gridSize = this.convertToPixels(unit === 'mm' ? 5 : unit === 'cm' ? 0.5 : unit === 'in' ? 0.1 : 20, unit);
+
+        gridOverlay.style.backgroundSize = `${gridSize}px ${gridSize}px`;
+    }
+
+    setupMouseTracking() {
+        const canvas = this.$('#cepCheckCanvas');
+        const mousePosition = this.$('#cepMousePosition');
+        
+        if (canvas && mousePosition) {
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const unitSelect = this.$('#cepCanvasUnit');
+                const unit = unitSelect ? unitSelect.value : 'mm';
+                
+                const realX = this.convertFromPixels(x, unit);
+                const realY = this.convertFromPixels(y, unit);
+                
+                mousePosition.textContent = `${realX.toFixed(1)}, ${realY.toFixed(1)} ${unit}`;
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                mousePosition.textContent = '';
+            });
+        }
     }
 }
 

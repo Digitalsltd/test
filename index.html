@@ -99,12 +99,51 @@
                         <button id="zoomInBtn" class="btn btn-sm">+</button>
                         <button id="fitToScreenBtn" class="btn btn-sm" data-i18n="zoom.fit">適合螢幕</button>
                     </div>
+                    
+                    <div class="canvas-size-controls">
+                        <label data-i18n="canvas.size">畫布尺寸:</label>
+                        <select id="canvasSizePreset" class="form-control-sm">
+                            <option value="custom" data-i18n="canvas.custom">自訂</option>
+                            <option value="hk_check">香港支票 (215×85mm)</option>
+                            <option value="us_check">美國支票 (203×89mm)</option>
+                            <option value="cn_check">中國支票 (190×80mm)</option>
+                            <option value="a4_landscape">A4橫向 (297×210mm)</option>
+                            <option value="a5_landscape">A5橫向 (210×148mm)</option>
+                        </select>
+                        <input type="number" id="canvasWidth" placeholder="寬度" class="form-control-xs" min="50" max="2000">
+                        <span>×</span>
+                        <input type="number" id="canvasHeight" placeholder="高度" class="form-control-xs" min="50" max="2000">
+                        <select id="canvasUnit" class="form-control-xs">
+                            <option value="px">px</option>
+                            <option value="mm" selected>mm</option>
+                            <option value="cm">cm</option>
+                            <option value="in">in</option>
+                        </select>
+                        <button id="applySizeBtn" class="btn btn-sm btn-primary" data-i18n="canvas.apply">套用</button>
+                    </div>
+                    
+                    <div class="canvas-tools">
+                        <button id="toggleRulerBtn" class="btn btn-sm" title="顯示/隱藏標尺">📏</button>
+                        <button id="toggleGridBtn" class="btn btn-sm" title="顯示/隱藏網格">⊞</button>
+                        <button id="snapToGridBtn" class="btn btn-sm" title="對齊網格">⊡</button>
+                    </div>
+                    
                     <div class="canvas-info">
                         <span id="canvasSize">尺寸: 未設定</span>
+                        <span id="mousePosition" class="mouse-pos"></span>
                     </div>
                 </div>
                 <div class="canvas-container" id="canvasContainer">
-                    <canvas id="checkCanvas"></canvas>
+                    <!-- Horizontal Ruler -->
+                    <div id="horizontalRuler" class="ruler ruler-horizontal"></div>
+                    <!-- Vertical Ruler -->
+                    <div id="verticalRuler" class="ruler ruler-vertical"></div>
+                    <!-- Canvas with rulers -->
+                    <div class="canvas-wrapper">
+                        <canvas id="checkCanvas"></canvas>
+                        <!-- Grid overlay -->
+                        <div id="gridOverlay" class="grid-overlay"></div>
+                    </div>
                 </div>
             </main>
 

@@ -66,7 +66,13 @@ class I18n {
                 'help.drag': '3. 拖拽欄位到合適位置',
                 'help.customize': '4. 在右側面板調整字體和顏色',
                 'help.export': '5. 點擊導出按鈕下載 PDF 或圖片',
-                'help.batch': '6. 匯入 Excel 檔案進行批量處理'
+                'help.batch': '6. 匯入 Excel 檔案進行批量處理',
+                'canvas.size': '畫布尺寸:',
+                'canvas.custom': '自訂',
+                'canvas.apply': '套用',
+                'canvas.ruler_toggle': '顯示/隱藏標尺',
+                'canvas.grid_toggle': '顯示/隱藏網格',
+                'canvas.snap_toggle': '對齊網格'
             },
             'en': {
                 'app.title': 'Check Editor Tool',
@@ -131,7 +137,13 @@ class I18n {
                 'help.drag': '3. Drag fields to appropriate positions',
                 'help.customize': '4. Adjust font and color in the right panel',
                 'help.export': '5. Click export button to download PDF or image',
-                'help.batch': '6. Import Excel file for batch processing'
+                'help.batch': '6. Import Excel file for batch processing',
+                'canvas.size': 'Canvas Size:',
+                'canvas.custom': 'Custom',
+                'canvas.apply': 'Apply',
+                'canvas.ruler_toggle': 'Show/Hide Ruler',
+                'canvas.grid_toggle': 'Show/Hide Grid',
+                'canvas.snap_toggle': 'Snap to Grid'
             }
         };
         this.init();

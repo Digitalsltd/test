@@ -102,23 +102,62 @@ $container_id = 'check-editor-pro-' . uniqid();
             <?php endif; ?>
         </aside>
 
-        <!-- Canvas Area -->
-        <main class="cep-canvas-area">
-            <div class="cep-canvas-toolbar">
-                <div class="cep-zoom-controls">
-                    <button id="cepZoomOutBtn" class="cep-btn cep-btn-sm">-</button>
-                    <span id="cepZoomLevel">100%</span>
-                    <button id="cepZoomInBtn" class="cep-btn cep-btn-sm">+</button>
-                    <button id="cepFitToScreenBtn" class="cep-btn cep-btn-sm" data-i18n="zoom.fit"><?php _e('適合螢幕', 'check-editor-pro'); ?></button>
+                    <!-- Canvas Area -->
+            <main class="cep-canvas-area">
+                <div class="cep-canvas-toolbar">
+                    <div class="cep-zoom-controls">
+                        <button id="cepZoomOutBtn" class="cep-btn cep-btn-sm">-</button>
+                        <span id="cepZoomLevel">100%</span>
+                        <button id="cepZoomInBtn" class="cep-btn cep-btn-sm">+</button>
+                        <button id="cepFitToScreenBtn" class="cep-btn cep-btn-sm" data-i18n="zoom.fit"><?php _e('適合螢幕', 'check-editor-pro'); ?></button>
+                    </div>
+                    
+                    <div class="cep-canvas-size-controls">
+                        <label><?php _e('畫布尺寸:', 'check-editor-pro'); ?></label>
+                        <select id="cepCanvasSizePreset" class="cep-form-control-sm">
+                            <option value="custom"><?php _e('自訂', 'check-editor-pro'); ?></option>
+                            <option value="hk_check"><?php _e('香港支票 (215×85mm)', 'check-editor-pro'); ?></option>
+                            <option value="us_check"><?php _e('美國支票 (203×89mm)', 'check-editor-pro'); ?></option>
+                            <option value="cn_check"><?php _e('中國支票 (190×80mm)', 'check-editor-pro'); ?></option>
+                            <option value="a4_landscape"><?php _e('A4橫向 (297×210mm)', 'check-editor-pro'); ?></option>
+                            <option value="a5_landscape"><?php _e('A5橫向 (210×148mm)', 'check-editor-pro'); ?></option>
+                        </select>
+                        <input type="number" id="cepCanvasWidth" placeholder="寬度" class="cep-form-control-xs" min="50" max="2000">
+                        <span>×</span>
+                        <input type="number" id="cepCanvasHeight" placeholder="高度" class="cep-form-control-xs" min="50" max="2000">
+                        <select id="cepCanvasUnit" class="cep-form-control-xs">
+                            <option value="px">px</option>
+                            <option value="mm" selected>mm</option>
+                            <option value="cm">cm</option>
+                            <option value="in">in</option>
+                        </select>
+                        <button id="cepApplySizeBtn" class="cep-btn cep-btn-sm cep-btn-primary"><?php _e('套用', 'check-editor-pro'); ?></button>
+                    </div>
+                    
+                    <div class="cep-canvas-tools">
+                        <button id="cepToggleRulerBtn" class="cep-btn cep-btn-sm" title="<?php _e('顯示/隱藏標尺', 'check-editor-pro'); ?>">📏</button>
+                        <button id="cepToggleGridBtn" class="cep-btn cep-btn-sm" title="<?php _e('顯示/隱藏網格', 'check-editor-pro'); ?>">⊞</button>
+                        <button id="cepSnapToGridBtn" class="cep-btn cep-btn-sm" title="<?php _e('對齊網格', 'check-editor-pro'); ?>">⊡</button>
+                    </div>
+                    
+                    <div class="cep-canvas-info">
+                        <span id="cepCanvasSize"><?php _e('尺寸: 未設定', 'check-editor-pro'); ?></span>
+                        <span id="cepMousePosition" class="cep-mouse-pos"></span>
+                    </div>
                 </div>
-                <div class="cep-canvas-info">
-                    <span id="cepCanvasSize"><?php _e('尺寸: 未設定', 'check-editor-pro'); ?></span>
+                <div class="cep-canvas-container" id="cepCanvasContainer">
+                    <!-- Horizontal Ruler -->
+                    <div id="cepHorizontalRuler" class="cep-ruler cep-ruler-horizontal"></div>
+                    <!-- Vertical Ruler -->
+                    <div id="cepVerticalRuler" class="cep-ruler cep-ruler-vertical"></div>
+                    <!-- Canvas with rulers -->
+                    <div class="cep-canvas-wrapper">
+                        <canvas id="cepCheckCanvas"></canvas>
+                        <!-- Grid overlay -->
+                        <div id="cepGridOverlay" class="cep-grid-overlay"></div>
+                    </div>
                 </div>
-            </div>
-            <div class="cep-canvas-container" id="cepCanvasContainer">
-                <canvas id="cepCheckCanvas"></canvas>
-            </div>
-        </main>
+            </main>
 
         <!-- Properties Panel -->
         <aside class="cep-properties-panel" id="cepPropertiesPanel" style="display: none;">

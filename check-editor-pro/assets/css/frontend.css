@@ -259,6 +259,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .cep-zoom-controls {
@@ -281,14 +283,75 @@
     font-weight: 500;
 }
 
+/* Canvas Size Controls */
+.cep-canvas-size-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.cep-canvas-size-controls label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #4a5568;
+    white-space: nowrap;
+}
+
+.cep-form-control-xs {
+    padding: 0.25rem 0.4rem;
+    width: 60px;
+    border: 1px solid #e2e8f0;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}
+
+.cep-form-control-sm {
+    padding: 0.25rem 0.5rem;
+    width: auto;
+    min-width: 100px;
+    border: 1px solid #e2e8f0;
+    border-radius: 3px;
+    font-size: 0.875rem;
+}
+
+/* Canvas Tools */
+.cep-canvas-tools {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.cep-canvas-tools button {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+}
+
+.cep-canvas-tools button.active {
+    background: #667eea;
+    color: white;
+}
+
 .cep-canvas-container {
     flex: 1;
     position: relative;
     overflow: auto;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
+    align-items: flex-start;
+    justify-content: flex-start;
+    background: #f8f9fa;
+}
+
+/* Canvas Wrapper with Rulers */
+.cep-canvas-wrapper {
+    position: relative;
+    margin: 2rem;
+    margin-top: calc(2rem + 20px); /* Space for horizontal ruler */
+    margin-left: calc(2rem + 20px); /* Space for vertical ruler */
 }
 
 #cepCheckCanvas {
@@ -296,8 +359,112 @@
     border-radius: 4px;
     background: white;
     box-shadow: 0 4px 6px rgba(0,0,0,0.07);
-    max-width: 100%;
-    max-height: 100%;
+    display: block;
+}
+
+/* Rulers */
+.cep-ruler {
+    position: absolute;
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    font-size: 10px;
+    color: #666;
+    z-index: 100;
+}
+
+.cep-ruler-horizontal {
+    top: calc(2rem - 1px);
+    left: calc(2rem + 20px);
+    height: 20px;
+    overflow: hidden;
+}
+
+.cep-ruler-vertical {
+    left: calc(2rem - 1px);
+    top: calc(2rem + 20px);
+    width: 20px;
+    overflow: hidden;
+}
+
+.cep-ruler-mark {
+    position: absolute;
+    background: #999;
+}
+
+.cep-ruler-horizontal .cep-ruler-mark {
+    width: 1px;
+    bottom: 0;
+}
+
+.cep-ruler-vertical .cep-ruler-mark {
+    height: 1px;
+    right: 0;
+}
+
+.cep-ruler-mark.major {
+    background: #333;
+}
+
+.cep-ruler-horizontal .cep-ruler-mark.major {
+    height: 8px;
+}
+
+.cep-ruler-horizontal .cep-ruler-mark.minor {
+    height: 4px;
+}
+
+.cep-ruler-vertical .cep-ruler-mark.major {
+    width: 8px;
+}
+
+.cep-ruler-vertical .cep-ruler-mark.minor {
+    width: 4px;
+}
+
+.cep-ruler-label {
+    position: absolute;
+    font-size: 9px;
+    color: #333;
+    line-height: 1;
+}
+
+.cep-ruler-horizontal .cep-ruler-label {
+    bottom: 1px;
+    transform: translateX(-50%);
+}
+
+.cep-ruler-vertical .cep-ruler-label {
+    right: 1px;
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: center;
+}
+
+/* Grid Overlay */
+.cep-grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.3;
+    background-image: 
+        linear-gradient(to right, #ddd 1px, transparent 1px),
+        linear-gradient(to bottom, #ddd 1px, transparent 1px);
+    background-size: 20px 20px;
+    display: none;
+}
+
+.cep-grid-overlay.visible {
+    display: block;
+}
+
+/* Mouse Position Display */
+.cep-mouse-pos {
+    font-size: 0.8rem;
+    color: #666;
+    margin-left: 1rem;
+    min-width: 100px;
 }
 
 /* Properties Panel */
