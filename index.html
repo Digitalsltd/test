@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支票編輯工具 - Check Editor</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="app-title" data-i18n="app.title">支票編輯工具</h1>
+                <div class="header-controls">
+                    <select id="languageSelect" class="language-select">
+                        <option value="zh-TW">繁體中文</option>
+                        <option value="en">English</option>
+                    </select>
+                    <button id="helpBtn" class="btn btn-secondary" data-i18n="buttons.help">說明</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3 data-i18n="sidebar.upload">上傳支票</h3>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-content">
+                            <div class="upload-icon">📄</div>
+                            <p data-i18n="upload.dragdrop">拖放支票圖像至此</p>
+                            <p data-i18n="upload.or">或</p>
+                            <button class="btn btn-primary" id="uploadBtn" data-i18n="upload.browse">瀏覽檔案</button>
+                            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 data-i18n="sidebar.templates">範本</h3>
+                    <div class="template-grid">
+                        <button class="template-btn" data-template="hk" data-i18n="templates.hk">香港支票</button>
+                        <button class="template-btn" data-template="cn" data-i18n="templates.cn">中國支票</button>
+                        <button class="template-btn" data-template="us" data-i18n="templates.us">美國支票</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 data-i18n="sidebar.fields">欄位工具</h3>
+                    <div class="field-tools">
+                        <button class="field-btn" data-field="payee" data-i18n="fields.payee">收款人</button>
+                        <button class="field-btn" data-field="amount-number" data-i18n="fields.amount_number">金額(數字)</button>
+                        <button class="field-btn" data-field="amount-text" data-i18n="fields.amount_text">金額(大寫)</button>
+                        <button class="field-btn" data-field="date" data-i18n="fields.date">日期</button>
+                        <button class="field-btn" data-field="memo" data-i18n="fields.memo">備註</button>
+                        <button class="field-btn" data-field="signature" data-i18n="fields.signature">簽名</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 data-i18n="sidebar.batch">批量處理</h3>
+                    <div class="batch-tools">
+                        <button class="btn btn-secondary" id="importExcelBtn" data-i18n="batch.import_excel">匯入 Excel</button>
+                        <input type="file" id="excelInput" accept=".xlsx,.xls" style="display: none;">
+                        <button class="btn btn-secondary" id="batchGenerateBtn" data-i18n="batch.generate" disabled>批量生成</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 data-i18n="sidebar.export">導出</h3>
+                    <div class="export-tools">
+                        <button class="btn btn-success" id="exportPdfBtn" data-i18n="export.pdf">下載 PDF</button>
+                        <button class="btn btn-secondary" id="exportImageBtn" data-i18n="export.image">下載圖片</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 data-i18n="sidebar.cloud">雲端儲存</h3>
+                    <div class="cloud-tools">
+                        <button class="btn btn-secondary" id="saveCloudBtn" data-i18n="cloud.save">儲存至雲端</button>
+                        <button class="btn btn-secondary" id="shareBtn" data-i18n="cloud.share">分享</button>
+                        <button class="btn btn-secondary" id="loadCloudBtn" data-i18n="cloud.load">載入雲端檔案</button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Canvas Area -->
+            <main class="canvas-area">
+                <div class="canvas-toolbar">
+                    <div class="zoom-controls">
+                        <button id="zoomOutBtn" class="btn btn-sm">-</button>
+                        <span id="zoomLevel">100%</span>
+                        <button id="zoomInBtn" class="btn btn-sm">+</button>
+                        <button id="fitToScreenBtn" class="btn btn-sm" data-i18n="zoom.fit">適合螢幕</button>
+                    </div>
+                    <div class="canvas-info">
+                        <span id="canvasSize">尺寸: 未設定</span>
+                    </div>
+                </div>
+                <div class="canvas-container" id="canvasContainer">
+                    <canvas id="checkCanvas"></canvas>
+                </div>
+            </main>
+
+            <!-- Properties Panel -->
+            <aside class="properties-panel" id="propertiesPanel" style="display: none;">
+                <h3 data-i18n="properties.title">屬性設定</h3>
+                <div class="property-group">
+                    <label data-i18n="properties.text">文字內容:</label>
+                    <input type="text" id="fieldText" class="form-control">
+                </div>
+                <div class="property-group">
+                    <label data-i18n="properties.font_size">字體大小:</label>
+                    <input type="range" id="fontSize" min="8" max="72" value="16" class="form-range">
+                    <span id="fontSizeValue">16px</span>
+                </div>
+                <div class="property-group">
+                    <label data-i18n="properties.font_color">字體顏色:</label>
+                    <input type="color" id="fontColor" value="#000000" class="form-control">
+                </div>
+                <div class="property-group">
+                    <label data-i18n="properties.font_family">字體:</label>
+                    <select id="fontFamily" class="form-control">
+                        <option value="Arial">Arial</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Microsoft JhengHei">微軟正黑體</option>
+                        <option value="Noto Sans TC">Noto Sans TC</option>
+                    </select>
+                </div>
+                <div class="property-group">
+                    <label data-i18n="properties.position">位置:</label>
+                    <div class="position-inputs">
+                        <label>X: <input type="number" id="positionX" class="form-control-sm"></label>
+                        <label>Y: <input type="number" id="positionY" class="form-control-sm"></label>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Modals -->
+        <div id="modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="modalBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="i18n.js"></script>
+    <script src="templates.js"></script>
+    <script src="checkEditor.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
